@@ -42,12 +42,14 @@ int client(char *server_ip, char *server_port) {
     struct sockaddr_in *ip_v4 = (struct sockaddr_in *)p->ai_addr;
 
     // now to print the ip nad port
+    // save in a buffer
     char ip_buffer[16];
+    // network to presentation
     inet_ntop(AF_INET, &ip_v4->sin_addr, ip_buffer, sizeof ip_buffer);
-
+    // network to host
     int port_buffer = ntohs(ip_v4->sin_port);
 
-    printf("%s : %s translates to %s : %d\n", server_ip, server_port, ip_buffer, port_buffer);
+    fprintf(stderr, "%s : %s translates to %s : %d\n", server_ip, server_port, ip_buffer, port_buffer);
   
   }
 
