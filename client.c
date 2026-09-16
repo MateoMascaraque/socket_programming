@@ -17,7 +17,33 @@
  * Return 0 on success, non-zero on failure
 */
 int client(char *server_ip, char *server_port) {
-    return 0;
+  // getaddrinfo
+  struct addrinfo hints; // info about our connection
+  struct addrinfo *servinfo // pointer to results given by getaddrinfo()
+
+  // set hints to use only IPv4 and TCP
+  memset(&hints, 0, sizeof hints); // empty hints 
+  hints.ai_family = AF_INET; // only IPv4
+  hints.ai_socktype = SOCK_STREAM; // stream sockets (already tcp)
+  hints.IPPROTO_TCP // tcp (I don't know if this is necessary)
+  hints.ai_flags = AI_PASSIVE; // fill in IP
+
+  // get address information (pointers to hints and servinfo)
+  int status = getaddrinfo(server_ip, server_port, &hints /*IPv4*/, &servinfo /*lnkedlist to store info*/);
+  // error check
+  if (status != 0) {
+    fprintf(stderr, "ERROR getaddrinfo - %s\n", gai_stderror(status));
+    return 1;
+  }
+
+  freeaddrinfo(servinfo);
+
+  // socket
+
+  // connect
+
+  // send / recv
+  return 0;
 }
 
 /*
