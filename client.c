@@ -19,7 +19,7 @@
  * Return 0 on success, non-zero on failure
 */
 int client(char *server_ip, char *server_port) {
-  // getaddrinfo
+  // GET ADDRES INFO //
   struct addrinfo hints; // info about our connection
   struct addrinfo *servinfo; // pointer to results given by getaddrinfo()
 
@@ -30,6 +30,7 @@ int client(char *server_ip, char *server_port) {
 
   // get address information (pointers to hints and servinfo)
   int status = getaddrinfo(server_ip, server_port, &hints /*IPv4*/, &servinfo /*lnkedlist to store info*/);
+  
   // error check
   if (status != 0) {
     fprintf(stderr, "ERROR getaddrinfo - %s\n", gai_strerror(status)); // error to descriptor stderr (2)
@@ -50,9 +51,7 @@ int client(char *server_ip, char *server_port) {
     int port_buffer = ntohs(ip_v4->sin_port);
 
     fprintf(stderr, "%s : %s translates to %s : %d\n", server_ip, server_port, ip_buffer, port_buffer);
-  
   }
-
   
   // socket
   
