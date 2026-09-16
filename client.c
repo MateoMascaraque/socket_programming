@@ -36,45 +36,56 @@ int client(char *server_ip, char *server_port) {
     fprintf(stderr, "ERROR getaddrinfo - %s\n", gai_strerror(status)); // error to descriptor stderr (2)
     return 1; // show error, not crash
   }
+  // entries are already valid
 
-  // TODO [maybe I should check for valid entries?]
-
-  // PRINT
   // iterate linked list
   for (struct addrinfo *p = servinfo; p != NULL; p = p->ai_next) {
+    // print IP : PORT
     struct sockaddr_in *ip_v4 = (struct sockaddr_in *)p->ai_addr;
-
-    // now to print the ip nad port
-    // save in a buffer
-    char ip_buffer[16];
-    // network to presentation
+    // ip buffer
+    char ip_buffer[INET_ADDRSTRLEN];
     inet_ntop(AF_INET, &ip_v4->sin_addr, ip_buffer, sizeof ip_buffer);
-    // network to host
     int port_buffer = ntohs(ip_v4->sin_port);
-
+    // print
     fprintf(stderr, "%s : %s translates to %s : %d\n", server_ip, server_port, ip_buffer, port_buffer);
-  }
-  
-  // SOCKET //
-  // create socket based on servinfo (maybe I should get the node of servinfo that I wnat to connect to)
-  int socket_descriptor =  socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
-  
-  if (socket_descriptor < 0) {
-    fprintf(stderr, "ERROR in socket creation\n");
-    return 1;
-  } else if (socket_descriptor <= 2) {
-    // 0 - 2 are supposed to be stdin, stdout and stderr (I put this just to see)
-    fprintf(stderr, "WEIRD SOCKET DESCRIPTOR NUMBER");
-  }
-  // print socket descriptor
-  fprintf(stderr, "socket descriptor: %i\n", socket_descriptor);
 
-  // CONNECT //
+    // SOCKET //
+    // create socket based on servinfo (maybe I should get the node of servinfo that I wnat to connect to)
+    int socket_descriptor =  socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
+    // error check
+    if (socket_descriptor < 0) {
+      perror("socket");
+      continue; // not crash
+    }
+    
+    // print socket descriptor
+    fprintf(stderr, "socket descriptor: %i\n", socket_descriptor);
+    
+    // CONNECT //
+    if (connect(socket_descriptor, p->ai_addr, p->ai_addrlen) < 0) {
+      perror("connect");
+      close(socket_descriptor);
+      socket_descriptor = -2; // to indicate no connection was made
+      continue;
+    }
+
+    // if we got here it means we made a connection
+    break; 
+  }
+
+  freeaddrinfo(servinfo); // re-give
+
+  // if we exhausted the linked list
+  if (socket_descriptor == -2) {
+    fprintf(stderr, "ERROR: A connection was not established");
+    return 1;
+  }
+  
+  
   
   // SEND //
   
-  // RECV //
-  freeaddrinfo(servinfo);
+
   return 0;
 }
 
