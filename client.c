@@ -23,21 +23,23 @@ int client(char *server_ip, char *server_port) {
   struct addrinfo hints; // info about our connection
   struct addrinfo *servinfo; // pointer to results given by getaddrinfo()
 
-  // set hints to use only IPv4 and TCP
+  // FILL HINTS to use only IPv4 and TCP
   memset(&hints, 0, sizeof hints); // empty hints 
   hints.ai_family = AF_INET; // only IPv4
   hints.ai_socktype = SOCK_STREAM; // stream sockets (already tcp)
 
-  // get address information (pointers to hints and servinfo)
-  int status = getaddrinfo(server_ip, server_port, &hints /*IPv4*/, &servinfo /*lnkedlist to store info*/);
+  // LOOKUP
+  int status = getaddrinfo(server_ip, server_port, &hints, &servinfo);
   
-  // error check
+  // ERROR CHECK
   if (status != 0) {
     fprintf(stderr, "ERROR getaddrinfo - %s\n", gai_strerror(status)); // error to descriptor stderr (2)
     return 1; // show error, not crash
   }
 
-  // print the resolved pages
+  // TODO [maybe I should check for valid entries?]
+
+  // PRINT
   // iterate linked list
   for (struct addrinfo *p = servinfo; p != NULL; p = p->ai_next) {
     struct sockaddr_in *ip_v4 = (struct sockaddr_in *)p->ai_addr;
@@ -53,11 +55,25 @@ int client(char *server_ip, char *server_port) {
     fprintf(stderr, "%s : %s translates to %s : %d\n", server_ip, server_port, ip_buffer, port_buffer);
   }
   
-  // socket
+  // SOCKET //
+  // create socket based on servinfo (maybe I should get the node of servinfo that I wnat to connect to)
+  int socket_descriptor =  socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
   
-  // connect
+  if (socket_descriptor < 0) {
+    fprintf(stderr, "ERROR in socket creation\n");
+    return 1;
+  } else if (socket_descriptor <= 2) {
+    // 0 - 2 are supposed to be stdin, stdout and stderr (I put this just to see)
+    fprintf(stderr, "WEIRD SOCKET DESCRIPTOR NUMBER");
+  }
+  // print socket descriptor
+  fprintf(stderr, "socket descriptor: %i\n", socket_descriptor);
+
+  // CONNECT //
   
-  // send / recv
+  // SEND //
+  
+  // RECV //
   freeaddrinfo(servinfo);
   return 0;
 }
