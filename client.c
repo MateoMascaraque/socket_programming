@@ -7,7 +7,9 @@
 #include <sys/types.h>
 #include <netdb.h>
 #include <netinet/in.h>
-#include <errno.h>
+
+// added for printing, debugging and testing
+#include <arpa/inet.h>      // inet_ntop, ntohs
 
 #define SEND_BUFFER_SIZE 2048
 
@@ -30,8 +32,23 @@ int client(char *server_ip, char *server_port) {
   int status = getaddrinfo(server_ip, server_port, &hints /*IPv4*/, &servinfo /*lnkedlist to store info*/);
   // error check
   if (status != 0) {
-    fprintf(stderr, "ERROR getaddrinfo - %s\n", gai_strerror(status));
-    return 1;
+    fprintf(stderr, "ERROR getaddrinfo - %s\n", gai_strerror(status)); // error to descriptor stderr (2)
+    return 1; // show error, not crash
+  }
+
+  // print the resolved pages
+  // iterate linked list
+  for (struct addrinfo *p = servinfo; p != NULL; p = p->ai_next) {
+    struct sockaddr_in *ip_v4 = (struct sockaddr_in *)p->ai_addr;
+
+    // now to print the ip nad port
+    char ip_buffer[16];
+    inet_ntop(AF_INET, &ip_v4->sin_addr, ip_buffer, sizeof ip_buffer);
+
+    int port_buffer = ntohs(ip_v4->sin_port);
+
+    printf("%s : %s translates to %s : %d\n", server_ip, server_port, ip_buffer, port_buffer);
+  
   }
 
   
