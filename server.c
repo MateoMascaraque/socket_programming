@@ -18,7 +18,25 @@
  * Return 0 on success, non-zero on failure
 */
 int server(char *server_port) {
-    return 0;
+  // GET ADDRES INFO //
+  struct addrinfo hints; // connection info
+  struct addrinfo *servinfo; // pointer to server info
+
+  // FILL HINTS to use only IPv4 and TCP (same as client)
+  memset(&hints, 0, sizeof hints); // empty hints 
+  hints.ai_family = AF_INET; // IPv4
+  hints.ai_socktype = SOCK_STREAM; 
+  hints.ai_flags = AI_PASSIVE; // fill in my address
+
+  int status = getaddrinfo(NULL, server_port, &hints, &servinfo); // null as filled on its own
+  if (status != 0) {
+    fprintf(stderr, "ERROR S getaddrinfo - %s\n", gai_strerror(status));
+    return 1;
+  }
+
+
+
+  return 0;
 }
 
 /*
