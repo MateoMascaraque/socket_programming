@@ -7,10 +7,6 @@
 #include <sys/types.h>
 #include <netdb.h>
 #include <netinet/in.h>
-/*
-// added for printing, debugging and testing
-#include <arpa/inet.h>      // inet_ntop, ntohs
-*/
 
 #define SEND_BUFFER_SIZE 2048
 
@@ -44,16 +40,6 @@ int client(char *server_ip, char *server_port) {
   //  and can just use break. I found it cool
   int socket_descriptor = -1;
   for (struct addrinfo *p = servinfo; p != NULL; p = p->ai_next) {
-    /*  // PRINT //
-      struct sockaddr_in *ip_v4 = (struct sockaddr_in *)p->ai_addr;
-      // ip buffer
-      char ip_buffer[INET_ADDRSTRLEN];
-      inet_ntop(AF_INET, &ip_v4->sin_addr, ip_buffer, sizeof ip_buffer);
-      int port_buffer = ntohs(ip_v4->sin_port);
-      // print
-      fprintf(stderr, "%s : %s translates to %s : %d\n", server_ip, server_port, ip_buffer, port_buffer);
-    */
-
     // SOCKET //
     // create socket based on servinfo (maybe I should get the node of servinfo that I wnat to connect to)
     
@@ -82,7 +68,7 @@ int client(char *server_ip, char *server_port) {
 
   // if we exhausted the linked list
   if (socket_descriptor == -1) {
-    fprintf(stderr, "ERROR: A connection was not established");
+    fprintf(stderr, "ERROR: A connection was not established\n");
     return 1;
   }
   
