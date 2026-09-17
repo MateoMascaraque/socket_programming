@@ -47,14 +47,36 @@ int server(char *server_port) {
       continue; // not crash
     }
 
-    
+    // SETSOCKOPT //
+    // So that I dont get the already in use error (not fully necessary)
+    int optval = 1;
+    if (setsockopt(socket_descriptor, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof optval) < 0) {
+      perror("setsockopt");
+      close(socket_descriptor);
+      socket_descriptor = -1;
+      continue;
+    }
 
-    // if we got here it means we made a connection
+    // BIND //
+    // almost like connect
+    if (bind(socket_descriptor, p->ai_addr, p->ai_addrlen) < 0) {
+      perror("bind");
+      close(socket_descriptor);
+      socket_descriptor = -1; // to indicate bind was unsuccessful
+      continue;
+    }
+
+    // if we got here it means we made a bind
     break; 
   }
 
   freeaddrinfo(servinfo); // re-give
-
+  
+  // if we exhausted the linked list
+  if (socket_descriptor == -1) {
+    fprintf(stderr, "ERROR: could not bind to port %s\n", server_port);
+    return 1;
+  }
 
 
 
