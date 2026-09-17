@@ -7,9 +7,10 @@
 #include <sys/types.h>
 #include <netdb.h>
 #include <netinet/in.h>
-
+/*
 // added for printing, debugging and testing
 #include <arpa/inet.h>      // inet_ntop, ntohs
+*/
 
 #define SEND_BUFFER_SIZE 2048
 
@@ -42,20 +43,21 @@ int client(char *server_ip, char *server_port) {
   // I have decided to use a for and not a while so that I don't need to add a connected var
   //  and can just use break. I found it cool
   int socket_descriptor = -1;
-  for (struct addrinfo *p = servinfo; p != NULL; p = p->ai_next) {}
-    // PRINT //
-    struct sockaddr_in *ip_v4 = (struct sockaddr_in *)p->ai_addr;
-    // ip buffer
-    char ip_buffer[INET_ADDRSTRLEN];
-    inet_ntop(AF_INET, &ip_v4->sin_addr, ip_buffer, sizeof ip_buffer);
-    int port_buffer = ntohs(ip_v4->sin_port);
-    // print
-    fprintf(stderr, "%s : %s translates to %s : %d\n", server_ip, server_port, ip_buffer, port_buffer);
+  for (struct addrinfo *p = servinfo; p != NULL; p = p->ai_next) {
+    /*  // PRINT //
+      struct sockaddr_in *ip_v4 = (struct sockaddr_in *)p->ai_addr;
+      // ip buffer
+      char ip_buffer[INET_ADDRSTRLEN];
+      inet_ntop(AF_INET, &ip_v4->sin_addr, ip_buffer, sizeof ip_buffer);
+      int port_buffer = ntohs(ip_v4->sin_port);
+      // print
+      fprintf(stderr, "%s : %s translates to %s : %d\n", server_ip, server_port, ip_buffer, port_buffer);
+    */
 
     // SOCKET //
     // create socket based on servinfo (maybe I should get the node of servinfo that I wnat to connect to)
     
-    socket_descriptor =  socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
+    socket_descriptor =  socket(p->ai_family, p->ai_socktype, p->ai_protocol);
     
     if (socket_descriptor < 0) {
       perror("socket");
@@ -68,7 +70,7 @@ int client(char *server_ip, char *server_port) {
     if (connect(socket_descriptor, p->ai_addr, p->ai_addrlen) < 0) {
       perror("connect");
       close(socket_descriptor);
-      socket_descriptor = -2; // to indicate no connection was made
+      socket_descriptor = -1; // to indicate no connection was made
       continue;
     }
 
@@ -79,7 +81,7 @@ int client(char *server_ip, char *server_port) {
   freeaddrinfo(servinfo); // re-give
 
   // if we exhausted the linked list
-  if (socket_descriptor == -2) {
+  if (socket_descriptor == -1) {
     fprintf(stderr, "ERROR: A connection was not established");
     return 1;
   }
@@ -87,12 +89,13 @@ int client(char *server_ip, char *server_port) {
   // SEND //
   // load from stdin by iterating and loading SEND_BUFFER_SIZE bytes at a time
   char stdin_buff[SEND_BUFFER_SIZE];
-  while (int len = read(stdin, stdin_buff,  sizeof(stdin_buff)) > 0) {
+  ssize_t = len
+  while ((len = read(0, stdin_buff,  sizeof stdin_buff)) > 0) { // 0 for stdin descriptor brackets ensure len isnt' bool
     int total = 0;
 
     // until all is sent
     while (total < len) {
-      // send byte
+      // send buff (up to max len)
       int bytes_sent = send(socket_descriptor, stdin_buff + total, len - total, 0);
       if (bytes_sent == -1) {
         perror("send");
@@ -100,15 +103,18 @@ int client(char *server_ip, char *server_port) {
         return 1;
       }
 
-      // look at next byte
+      // look at buffer part
       total += bytes_sent;
     }
-    if (len < 0) {
-      perror("read");
-    }
+  }
+  // check read
+  if (len < 0) {
+    perror("read");
+    close(socket_descriptor);
+    return 1;
   }
   
-
+  close(socket_descriptor);
   return 0;
 }
 
