@@ -34,6 +34,28 @@ int server(char *server_port) {
     return 1;
   }
 
+  // copied from client, replace connect with setsockopt and bind
+  int socket_descriptor = -1;
+  for (struct addrinfo *p = servinfo; p != NULL; p = p->ai_next) {
+    // SOCKET //
+    // create socket based on servinfo (maybe I should get the node of servinfo that I wnat to connect to)
+    
+    socket_descriptor =  socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+    
+    if (socket_descriptor < 0) {
+      perror("socket");
+      continue; // not crash
+    }
+
+    
+
+    // if we got here it means we made a connection
+    break; 
+  }
+
+  freeaddrinfo(servinfo); // re-give
+
+
 
 
   return 0;
