@@ -39,8 +39,11 @@ int client(char *server_ip, char *server_port) {
   // entries are already valid
 
   // iterate linked list
-  for (struct addrinfo *p = servinfo; p != NULL; p = p->ai_next) {
-    // print IP : PORT
+  // I have decided to use a for and not a while so that I don't need to add a connected var
+  //  and can just use break. I found it cool
+  int socket_descriptor = -1;
+  for (struct addrinfo *p = servinfo; p != NULL; p = p->ai_next) {}
+    // PRINT //
     struct sockaddr_in *ip_v4 = (struct sockaddr_in *)p->ai_addr;
     // ip buffer
     char ip_buffer[INET_ADDRSTRLEN];
@@ -51,14 +54,14 @@ int client(char *server_ip, char *server_port) {
 
     // SOCKET //
     // create socket based on servinfo (maybe I should get the node of servinfo that I wnat to connect to)
-    int socket_descriptor =  socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
-    // error check
+    
+    socket_descriptor =  socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
+    
     if (socket_descriptor < 0) {
       perror("socket");
       continue; // not crash
     }
-    
-    // print socket descriptor
+
     fprintf(stderr, "socket descriptor: %i\n", socket_descriptor);
     
     // CONNECT //
@@ -81,9 +84,29 @@ int client(char *server_ip, char *server_port) {
     return 1;
   }
   
-  
-  
   // SEND //
+  // load from stdin by iterating and loading SEND_BUFFER_SIZE bytes at a time
+  char stdin_buff[SEND_BUFFER_SIZE];
+  while (int len = read(stdin, stdin_buff,  sizeof(stdin_buff)) > 0) {
+    int total = 0;
+
+    // until all is sent
+    while (total < len) {
+      // send byte
+      int bytes_sent = send(socket_descriptor, stdin_buff + total, len - total, 0);
+      if (bytes_sent == -1) {
+        perror("send");
+        close(socket_descriptor);
+        return 1;
+      }
+
+      // look at next byte
+      total += bytes_sent;
+    }
+    if (len < 0) {
+      perror("read");
+    }
+  }
   
 
   return 0;
