@@ -73,7 +73,7 @@ int client(char *server_ip, char *server_port) {
   // SEND //
   // load from stdin by iterating and loading SEND_BUFFER_SIZE bytes at a time
   char stdin_buff[SEND_BUFFER_SIZE];
-  ssize_t = len
+  ssize_t len;
   while ((len = read(0, stdin_buff,  sizeof stdin_buff)) > 0) { // 0 for stdin descriptor brackets ensure len isnt' bool
     int total = 0;
 
