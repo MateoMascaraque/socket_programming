@@ -93,11 +93,11 @@ int server(char *server_port) {
   int client_descriptor;
 
   // loop to accept
-  while (true) {
-    client_descriptor = accept(sockfd,NULL,NULL); // we don't need a requirement
+  while (1) {
+    client_descriptor = accept(socket_descriptor, NULL, NULL); // we don't need a requirement
     if (client_descriptor == -1) {
         perror("accept");
-        continue; // not block
+        continue; // not quit
     }
 
     // receive in peices (like in clients)
