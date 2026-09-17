@@ -50,8 +50,6 @@ int client(char *server_ip, char *server_port) {
       continue; // not crash
     }
 
-    fprintf(stderr, "socket descriptor: %i\n", socket_descriptor);
-    
     // CONNECT //
     if (connect(socket_descriptor, p->ai_addr, p->ai_addrlen) < 0) {
       perror("connect");
